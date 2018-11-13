@@ -1,0 +1,8 @@
+# Required for "local" persistent volume
+# https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer

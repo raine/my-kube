@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: murmur-local-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/disks/murmur-local-pv
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - kube-1
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: murmur-service
+spec:
+  # https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-type-nodeport
+  # Preserve source IP
+  externalTrafficPolicy: Local
+  selector:
+    app: murmur
+  type: NodePort
+  ports:
+  - protocol: TCP
+    nodePort: 30956
+    port: 64738
+    targetPort: 64738
+    name: murmur-tcp
+  - protocol: UDP
+    port: 64738
+    nodePort: 30956
+    targetPort: 64738
+    name: murmur-udp
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: murmur
+spec:
+  serviceName: murmur
+  replicas: 1
+  selector:
+    matchLabels:
+      app: murmur
+  template:
+    metadata:
+      labels:
+        app: murmur
+    spec:
+      containers:
+      - name: murmur
+        image: rainevi/murmur:latest
+        imagePullPolicy: Always
+        # resources:
+        #   limits:
+        #     cpu: 0.5
+        #     memory: 500Mi
+        ports:
+        - containerPort: 64738
+          name: murmur-tcp
+        - containerPort: 64738
+          name: murmur-udp
+          protocol: UDP
+        volumeMounts:
+          - name: murmur-volume-claim
+            mountPath: /data
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: murmur-tcp
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 10
+  volumeClaimTemplates:
+   - metadata:
+       name: murmur-volume-claim
+     spec:
+       accessModes:
+       - ReadWriteOnce
+       storageClassName: local-storage
+       resources:
+         requests:
+           storage: 10Mi
