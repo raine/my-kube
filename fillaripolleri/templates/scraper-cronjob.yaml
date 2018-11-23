@@ -1,0 +1,29 @@
+{{- $fullName := printf "%s-%s" (include "fillaripolleri.fullname" .) "scraper" -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ $fullName }}
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 12 }}
+          containers:
+            - name: {{ $fullName }}
+              imagePullPolicy: Always
+              image: {{ .Values.scraper.repository }}:{{ .Values.scraper.tag }}
+              args:
+                - /bin/sh
+                - -c
+                - node dist/main.js && curl -fsS --retry 3 https://hc-ping.com/f42ff977-67be-45ce-9708-e8d92836ba56
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: fillaripolleri
+                      key: database_url

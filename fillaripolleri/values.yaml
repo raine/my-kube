@@ -1,0 +1,18 @@
+host: raine.cool
+
+server:
+  repository: registry.gitlab.com/rainevi/fillaripolleri/server
+  tag: latest
+  port: 3000
+
+client:
+  repository: registry.gitlab.com/rainevi/fillaripolleri/client
+  tag: latest
+  port: 80
+
+scraper:
+  repository: registry.gitlab.com/rainevi/fillaritori-scraper
+  tag: latest
+
+imagePullSecrets:
+  - name: gitlab-registry

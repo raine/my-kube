@@ -1,0 +1,15 @@
+{{- $fullName := printf "%s-%s" (include "fillaripolleri.fullname" .) "server" -}}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/instance: {{ $fullName }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.server.port }}
+      targetPort: {{ .Values.server.port }}
+      name: http
+  selector:
+    app.kubernetes.io/instance: {{ $fullName }}

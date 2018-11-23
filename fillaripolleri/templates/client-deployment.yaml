@@ -1,0 +1,23 @@
+{{- $fullName := printf "%s-%s" (include "fillaripolleri.fullname" .) "client" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $fullName }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ $fullName }}
+    spec:
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      containers:
+        - name: {{ $fullName }}
+          image: {{ .Values.client.repository }}:{{ .Values.client.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.client.port }}
