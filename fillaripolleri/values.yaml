@@ -14,5 +14,9 @@ scraper:
   repository: registry.gitlab.com/rainevi/fillaritori-scraper
   tag: latest
 
+db_backup:
+  repository: registry.gitlab.com/rainevi/fillaripolleri/db-backup
+  tag: latest
+
 imagePullSecrets:
   - name: gitlab-registry

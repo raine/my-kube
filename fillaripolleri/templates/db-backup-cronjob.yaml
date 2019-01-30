@@ -1,0 +1,53 @@
+{{- $fullName := printf "%s-%s" (include "fillaripolleri.fullname" .) "db-backup" -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ $fullName }}
+spec:
+  schedule: "0 0 * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 12 }}
+          containers:
+            - name: {{ $fullName }}
+              imagePullPolicy: Always
+              image: {{ .Values.db_backup.repository }}:{{ .Values.db_backup.tag }}
+              args:
+                - /bin/bash
+                - -c
+                - pg_dump --clean --no-acl --no-owner -d $DATABASE_URL -Fc
+                    | aws s3 cp - $BUCKET_URL/$(date +%Y%m%dT%H%M%S).dump
+                    && curl -fsS --retry 3 $HEALTHCHECK_URL
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: fillaripolleri
+                      key: database_url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: fillaripolleri
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: fillaripolleri
+                      key: aws_secret_access_key
+                - name: AWS_DEFAULT_REGION
+                  value: eu-north-1
+                - name: BUCKET_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: fillaripolleri
+                      key: db_backup_s3_bucket_url
+                - name: HEALTHCHECK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: fillaripolleri
+                      key: db_backup_healthcheck_url
