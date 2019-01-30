@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: stuff-nginx-local-pv
+spec:
+  capacity:
+    storage: 10Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/volume-hel1-1/stuff-nginx-local-pv
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - kube-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stuff-nginx-local-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Mi
+  storageClassName: local-storage
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stuff-nginx-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: stuff-nginx
+    spec:
+      containers:
+        - image: nginx:1.15-alpine
+          name: nginx
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: "/usr/share/nginx/html"
+              name: stuff-nginx-local-pv
+      volumes:
+        - name:  stuff-nginx-local-pv
+          persistentVolumeClaim:
+            claimName: stuff-nginx-local-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: stuff-nginx-service
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  selector:
+    app: stuff-nginx
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: stuff-nginx-ingress
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+spec:
+  tls:
+    - hosts:
+      - raine.cool
+      secretName: fillaripolleri-service-tls
+  rules:
+  - host: raine.cool
+    http:
+      paths:
+      - path: /stuff
+        backend:
+          serviceName: stuff-nginx-service
+          servicePort: http
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: display-ads-cronjob
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: display-ads-cronjob
+              imagePullPolicy: Always
+              image: rainevi/display-ads@sha256:d60d39ed030888fff85b331fc2a2a9a97760a09166c7aac506f5ad0141785651
+              args:
+                - bash
+                - -c
+                - ./run > /usr/share/nginx/html/display-ads.html
+              volumeMounts:
+                - mountPath: "/usr/share/nginx/html"
+                  name: stuff-nginx-local-pv
+          volumes:
+            - name: stuff-nginx-local-pv
+              persistentVolumeClaim:
+                claimName: stuff-nginx-local-pvc
