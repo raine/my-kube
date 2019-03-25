@@ -19,11 +19,11 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
-      - path: /fillaripolleri
+      - path: /
         backend:
           serviceName: {{ $fullName }}-client
           servicePort: http
-      - path: /fillaripolleri/api
+      - path: /api
         backend:
           serviceName: {{ $fullName }}-server
           servicePort: http
