@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ruoste-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ruoste-bot
+  template:
+    metadata:
+      labels:
+        app: ruoste-bot
+    spec:
+      imagePullSecrets:
+        - name: gitlab-registry
+      containers:
+        - name: ruoste-bot
+          image: registry.gitlab.com/rainevi/ruoste_bot:latest
+          imagePullPolicy: Always
+          env:
+            - name: BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ruoste-bot
+                  key: BOT_TOKEN
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: ruoste-bot
+                  key: SENTRY_DSN
