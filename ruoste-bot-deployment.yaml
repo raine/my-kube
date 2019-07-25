@@ -4,6 +4,8 @@ metadata:
   name: ruoste-bot
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: ruoste-bot
@@ -29,3 +31,5 @@ spec:
                 secretKeyRef:
                   name: ruoste-bot
                   key: SENTRY_DSN
+            - name: NODE_ENV
+              value: production
