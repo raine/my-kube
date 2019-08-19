@@ -33,3 +33,5 @@ spec:
                   key: SENTRY_DSN
             - name: NODE_ENV
               value: production
+            - name: LAGGY_SERVERS
+              value: '89.163.190.20:28018'
