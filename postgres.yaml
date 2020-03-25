@@ -33,7 +33,7 @@ spec:
       port: 5432
       targetPort: 5432
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:10.4
+          image: postgres:12
           env:
             - name: POSTGRES_USER
               valueFrom:
