@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+kubectl delete job/db-backup-test || true
+helm upgrade -f values.yaml --reuse-values master .
+kubectl create job --from=cronjob/master-fillaripolleri-db-backup db-backup-test
