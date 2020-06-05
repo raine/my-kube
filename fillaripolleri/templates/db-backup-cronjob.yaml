@@ -21,8 +21,8 @@ spec:
                 - /bin/bash
                 - -c
                 - pg_dump --clean --no-acl --no-owner -d $DATABASE_URL -Fc
-                    | aws s3 cp - $BUCKET_URL/$(date +%Y%m%dT%H%M%S).dump
-                    && curl -fsS --retry 3 $HEALTHCHECK_URL
+                    | aws s3 cp - $BUCKET_URL/$(date +%Y%m%dT%H%M%S).dump || exit 0
+                - curl -fsS --retry 3 $HEALTHCHECK_URL
               env:
                 - name: DATABASE_URL
                   valueFrom:
