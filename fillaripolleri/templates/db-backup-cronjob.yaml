@@ -11,6 +11,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            app.kubernetes.io/instance: {{ $fullName }}
         spec:
           restartPolicy: OnFailure
           imagePullSecrets:
