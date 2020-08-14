@@ -27,7 +27,7 @@ data:
     [INPUT]
         Name              tail
         Tag               kube.*
-        Path              /var/log/containers/bikeshopsearch-*.log,/var/log/containers/master-fillaripolleri-*.log
+        Path              /var/log/containers/bikeshopsearch-*.log, /var/log/containers/master-fillaripolleri-*.log, /var/log/containers/nginx-ingress-controller-*.log
         Parser            docker
         DB                /var/log/flb_kube.db
         Mem_Buf_Limit     5MB

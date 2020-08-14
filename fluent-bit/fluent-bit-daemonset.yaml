@@ -18,7 +18,7 @@ spec:
         version: v1
         kubernetes.io/cluster-service: "true"
       annotations:
-        configHash: "13"
+        configHash: "14"
     spec:
       containers:
         - name: fluent-bit
