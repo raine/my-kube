@@ -21,6 +21,7 @@ data:
     @INCLUDE input-kubernetes.conf
     @INCLUDE filter-kubernetes.conf
     @INCLUDE filter-rewrite.conf
+    @INCLUDE filter-modify.conf
     @INCLUDE output-file.conf
 
   input-kubernetes.conf: |
@@ -57,6 +58,13 @@ data:
         match     kube.*
         rule      $kubernetes['labels']['app.kubernetes.io/instance'] ^(.*)$ $0.log false
         rule      $kubernetes['labels']['k8s-app'] ^(.*)$ $0.log false
+
+  # Rewrite tag to simple app name to get logs in the same file always
+  filter-modify.conf: |
+    [FILTER]
+        Name      modify
+        Match     kube.*
+        Remove    kubernetes
 
   output-file.conf: |
     [OUTPUT]
