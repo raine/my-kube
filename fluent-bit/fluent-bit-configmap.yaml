@@ -63,7 +63,7 @@ data:
   filter-modify.conf: |
     [FILTER]
         Name      modify
-        Match     kube.*
+        Match     *
         Remove    kubernetes
 
   output-file.conf: |
